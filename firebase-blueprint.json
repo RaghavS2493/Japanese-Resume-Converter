@@ -1,0 +1,48 @@
+{
+  "entities": {
+    "profile": {
+      "title": "ResumeProfile",
+      "description": "A saved profile containing the translated Japanese Shokumukeirekisho and original metadata",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the profile"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID or null for local guest profiles"
+        },
+        "name": {
+          "type": "string",
+          "description": "User-friendly nickname or title of this profile draft"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when this profile was initialized"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last modification"
+        },
+        "originalResumeText": {
+          "type": "string",
+          "description": "Raw English resume text inputted or parsed"
+        },
+        "data": {
+          "type": "object",
+          "description": "Detailed Shokumukeirekisho structures matching standard Japanese forms"
+        }
+      },
+      "required": ["id", "name", "originalResumeText", "data", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/profiles/{profileId}": {
+      "schema": "profile",
+      "description": "Secure storage module for saved profiles and generated CV documents"
+    }
+  }
+}

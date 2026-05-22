@@ -1,0 +1,6 @@
+{
+  "name": "Shokumukeirekisho CV Converter",
+  "description": "Convert English CVs and Resume documents into professional Japanese Shokumukeirekisho (職務経歴書) with secure cloud storage, editing interface, PDF downloads, and offline support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

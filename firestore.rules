@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Strict profile structures validation helper
+    function isValidProfile(data) {
+      return data.keys().hasAll(['id', 'userId', 'name', 'createdAt', 'updatedAt', 'originalResumeText', 'data'])
+        && data.keys().size() == 7
+        && data.id is string
+        && data.id.size() <= 128
+        && (data.userId == null || data.userId is string)
+        && data.name is string
+        && data.name.size() >= 1
+        && data.name.size() <= 256
+        && data.originalResumeText is string
+        && data.originalResumeText.size() <= 150000
+        && data.data is map
+        && data.createdAt is string
+        && data.updatedAt is string;
+    }
+
+    // Profiles Collection Guard
+    match /profiles/{profileId} {
+      allow get: if isSignedIn() && isOwner(existing().userId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() 
+        && isValidId(profileId) 
+        && isValidProfile(incoming()) 
+        && isOwner(incoming().userId);
+        
+      allow update: if isSignedIn() 
+        && isValidId(profileId) 
+        && isValidProfile(incoming()) 
+        && isOwner(existing().userId) 
+        && isOwner(incoming().userId)
+        && incoming().createdAt == existing().createdAt; // Ensure immutability of creation timestamps
+        
+      allow delete: if isSignedIn() 
+        && isValidId(profileId) 
+        && isOwner(existing().userId);
+    }
+  }
+}
